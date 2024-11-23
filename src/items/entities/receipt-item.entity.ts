@@ -4,14 +4,14 @@ import { Receipt } from "./receipt.entity";
 @Entity()
 export class ReceiptItem {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  shortDescription: string;
+  shortDescription!: string;
 
   @Column("decimal", { precision: 10, scale: 2 }) // Store prices as decimals
-  price: string;
+  price!: string;
 
   @ManyToOne(() => Receipt, (receipt) => receipt.items, { onDelete: "CASCADE" })
-  receipt: Receipt;
+  receipt!: Receipt;
 }
