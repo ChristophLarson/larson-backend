@@ -4,7 +4,7 @@ import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 
 @Injectable()
-export class ItemsService {
+export class ReceiptService {
 
   /*
     Takes a receipt object and returns the id of a receipt
