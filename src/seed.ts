@@ -1,6 +1,6 @@
 import { AppDataSource } from "./data-source";
-import { Receipt } from "./items/entities/receipt.entity";
-import { ReceiptItem } from "./items/entities/receipt-item.entity";
+import { Receipt } from "./receipt/entities/receipt.entity";
+import { ReceiptItem } from "./receipt/entities/receipt-item.entity";
 
 export async function seedDatabase() {
   // Initialize the data source (connect to the database)

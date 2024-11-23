@@ -1,5 +1,5 @@
 import { DataSource } from "typeorm";
-import { Receipt } from "./items/entities/receipt.entity";
+import { Receipt } from "./receipt/entities/receipt.entity";
 
 export const AppDataSource = new DataSource({
   type: "sqlite",
