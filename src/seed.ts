@@ -1,5 +1,6 @@
 import { AppDataSource } from "./data-source";
 import { Receipt } from "./items/entities/receipt.entity";
+import { ReceiptItem } from "./items/entities/receipt-item.entity";
 
 export async function seedDatabase() {
   // Initialize the data source (connect to the database)
@@ -7,30 +8,37 @@ export async function seedDatabase() {
 
   const receiptRepository = AppDataSource.getRepository(Receipt);
 
-  // Create the Receipt
-  const receipt = new Receipt();
-  receipt.retailer = "Target";
-  receipt.purchaseDate = "2022-01-01";
-  receipt.purchaseTime = "13:01";
-  receipt.total = "35.35";
+  // Create the first Receipt (Target)
+  const receipt1 = new Receipt();
+  receipt1.retailer = "Target";
+  receipt1.purchaseDate = "2022-01-01";
+  receipt1.purchaseTime = "13:01";
+  receipt1.total = "35.35";
 
-  // Create Receipt Items
-  const items = [
+  receipt1.items = [
     { shortDescription: "Mountain Dew 12PK", price: "6.49" },
     { shortDescription: "Emils Cheese Pizza", price: "12.25" },
     { shortDescription: "Knorr Creamy Chicken", price: "1.26" },
     { shortDescription: "Doritos Nacho Cheese", price: "3.35" },
-    { shortDescription: "   Klarbrunn 12-PK 12 FL OZ  ", price: "12.00" },
-  ];
+    { shortDescription: "Klarbrunn 12-PK 12 FL OZ", price: "12.00" },
+  ].map((itemData) => Object.assign(new ReceiptItem(), itemData));
 
-  receipt.items = items.map((itemData) => {
-    const item = new ReceiptItem();
-    item.shortDescription = itemData.shortDescription.trim();
-    item.price = itemData.price;
-    return item;
-  });
+  // Create the second Receipt (M&M Corner Market)
+  const receipt2 = new Receipt();
+  receipt2.retailer = "M&M Corner Market";
+  receipt2.purchaseDate = "2022-03-20";
+  receipt2.purchaseTime = "14:33";
+  receipt2.total = "9.00";
 
-  await receiptRepository.save(receipt);
+  receipt2.items = [
+    { shortDescription: "Gatorade", price: "2.25" },
+    { shortDescription: "Gatorade", price: "2.25" },
+    { shortDescription: "Gatorade", price: "2.25" },
+    { shortDescription: "Gatorade", price: "2.25" },
+  ].map((itemData) => Object.assign(new ReceiptItem(), itemData));
 
-  console.log("Database seeded with sample receipt!");
+  // Save the Receipts and Items (cascade saves items automatically)
+  await receiptRepository.save([receipt1, receipt2]);
+
+  console.log("Database seeded");
 }
