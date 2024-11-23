@@ -1,9 +1,9 @@
-import { Entity, Column, OneToMany, PrimaryColumn } from "typeorm";
+import { Entity, Column, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { ReceiptItem } from "./receipt-item.entity";
 
 @Entity()
 export class Receipt {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id!: string;
 
   @Column()
