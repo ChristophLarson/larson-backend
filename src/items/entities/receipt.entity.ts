@@ -1,10 +1,10 @@
-
-import { Entity, PrimaryGeneratedColumn, Column} from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { ReceiptItem } from "./receipt-item.entity";
 
 @Entity()
 export class Receipt {
-  @Column()
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column()
   retailer: string;
@@ -15,6 +15,9 @@ export class Receipt {
   @Column()
   purchaseTime: string;
 
-  @Column()
+  @Column("decimal", { precision: 10, scale: 2 })
   total: string;
+
+  @OneToMany(() => ReceiptItem, (item) => item.receipt, { cascade: true })
+  items: ReceiptItem[];
 }
