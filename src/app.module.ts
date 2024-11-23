@@ -6,7 +6,6 @@ import { ReceiptItem } from './receipt/entities/receipt-item.entity';
 
 @Module({
   imports: [
-    // TypeOrmModule is used to connect to the database
     TypeOrmModule.forRoot({
         type: 'sqlite',
         database: 'data/db.sqlite',
