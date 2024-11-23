@@ -1,10 +1,19 @@
 import { AppDataSource } from "./data-source";
+import { DataSource } from "typeorm";
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from "./app.module";
 import { Receipt } from "./receipt/entities/receipt.entity";
 import { ReceiptItem } from "./receipt/entities/receipt-item.entity";
 
 export async function seedDatabase() {
-  // Initialize the data source (connect to the database)
-  await AppDataSource.initialize();
+
+  const app = await NestFactory.create(AppModule);
+
+  const dataSource = app.get(DataSource);
+
+  if (!dataSource.isInitialized) {
+    await dataSource.initialize();
+  }
 
   const receiptRepository = AppDataSource.getRepository(Receipt);
 

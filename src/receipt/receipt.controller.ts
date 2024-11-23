@@ -7,6 +7,6 @@ export class ReceiptController {
 
   @Get()
   findAll() {
-    return this.receiptService.findAll();
+    //return this.receiptService.findAll();
   }
 }

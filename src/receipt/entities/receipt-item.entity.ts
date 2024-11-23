@@ -9,7 +9,7 @@ export class ReceiptItem {
   @Column()
   shortDescription!: string;
 
-  @Column("decimal", { precision: 10, scale: 2 }) // Store prices as decimals
+  @Column("decimal", { precision: 10, scale: 2 })
   price!: string;
 
   @ManyToOne(() => Receipt, (receipt) => receipt.items, { onDelete: "CASCADE" })

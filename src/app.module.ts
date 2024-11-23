@@ -12,7 +12,6 @@ import { ReceiptItem } from './receipt/entities/receipt-item.entity';
         entities: [Receipt, ReceiptItem],
         synchronize: true,
     }),
-
     ReceiptModule,
   ],
 })
