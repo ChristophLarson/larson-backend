@@ -1,9 +1,15 @@
-import { Module } from '@nestjs/common';
-import { ItemsService } from './receipt.service';
-import { ItemsController } from './items.controller';
+import { Module } from "@nestjs/common";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { Receipt } from "./entities/receipt.entity";
+import { ReceiptItem } from "./entities/receipt-item.entity";
+import { ReceiptService } from "./receipt.service";
+import { ReceiptController } from "./receipt.controller";
 
 @Module({
-  controllers: [ItemsController],
-  providers: [ItemsService],
+  imports: [
+    TypeOrmModule.forFeature([Receipt, ReceiptItem])
+  ],
+  providers: [ReceiptService],
+  controllers: [ReceiptController],
 })
-export class ItemsModule {}
+export class ReceiptModule {}
