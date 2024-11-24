@@ -1,0 +1,31 @@
+# Node.js
+node_modules/
+
+# npm logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+
+# TypeScript files
+*.tsbuildinfo
+
+# Dist folder (compiled output)
+dist/
+
+# SQLite database file (in-memory or file-based databases should not be committed)
+*.sqlite
+*.sqlite3
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# IDE files (VSCode, IntelliJ, etc.)
+.vscode/
+.idea/
+
+# Logs and temporary files
+*.log
