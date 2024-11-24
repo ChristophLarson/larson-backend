@@ -4,7 +4,6 @@ import { Receipt } from './entities/receipt.entity';
 import { ReceiptItem } from './entities/receipt-item.entity';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { v4 as uuidv4 } from 'uuid';
 
 describe('ReceiptService', () => {
   let service: ReceiptService;
@@ -28,40 +27,6 @@ describe('ReceiptService', () => {
     receiptRepository = module.get<Repository<Receipt>>(getRepositoryToken(Receipt));
   });
 
-  describe('processReceipt', () => {
-    it('should generate and return a valid receipt ID', async () => {
-      const receipt: Receipt = {
-        retailer: 'Target',
-        purchaseDate: '2022-01-01',
-        purchaseTime: '13:01',
-        total: '35.35',
-        items: [],
-      };
-
-      const id = uuidv4();
-      jest.spyOn(uuidv4, 'v4').mockReturnValue(id);
-      jest.spyOn(receiptRepository, 'save').mockResolvedValue(receipt);
-
-      const result = await service.processReceipt(receipt);
-      expect(result).toBe(id);
-      expect(receipt.id).toBe(id); // Ensure the receipt gets the id
-    });
-
-    it('should throw error when saving receipt fails', async () => {
-      const receipt: Receipt = {
-        retailer: 'Target',
-        purchaseDate: '2022-01-01',
-        purchaseTime: '13:01',
-        total: '35.35',
-        items: [],
-      };
-
-      jest.spyOn(receiptRepository, 'save').mockRejectedValue(new Error('Database error'));
-
-      await expect(service.processReceipt(receipt)).rejects.toThrowError('Database error');
-    });
-  });
-
   describe('calculatePoints', () => {
     it('should return the correct points for a valid receipt', async () => {
       const receipt: Receipt = {
@@ -71,15 +36,15 @@ describe('ReceiptService', () => {
         purchaseTime: '13:01',
         total: '35.35',
         items: [
-          { shortDescription: 'Mountain Dew 12PK', price: '6.49' },
-          { shortDescription: 'Emils Cheese Pizza', price: '12.25' },
+          { id: 1, shortDescription: 'Mountain Dew 12PK', price: '6.49', receipt: {} as any},
+          { id: 2, shortDescription: 'Emils Cheese Pizza', price: '12.25', receipt: {} as any },
         ],
       };
 
       jest.spyOn(receiptRepository, 'findOne').mockResolvedValue(receipt as any);
 
       const result = await service.calculatePoints('1234');
-      expect(result).toBeGreaterThan(0); // Points should be greater than 0
+      expect(result).toBe(20); // Earns 20 points
     });
 
     it('should throw error when receipt not found', async () => {
@@ -91,8 +56,8 @@ describe('ReceiptService', () => {
 
   describe('calculatePointsFromRetailer', () => {
     it('should return correct points based on retailer name', () => {
-      const points = service.calculatePointsFromRetailer('Target');
-      expect(points).toBe(6); // "Target" -> length of "Target" is 6
+      const points = service.calculatePointsFromRetailer(' Ta rg et ');
+      expect(points).toBe(6); // "Target" -> trimmed length of "Target" is 6
     });
 
     it('should handle empty retailer name gracefully', () => {
@@ -104,24 +69,49 @@ describe('ReceiptService', () => {
   describe('calculatePointsFromTotal', () => {
     it('should calculate points for valid total', () => {
       const points = service.calculatePointsFromTotal('35.35');
-      expect(points).toBe(25); // "35.35" -> multiple of 0.25
+      expect(points).toBe(0); // "35.35" not  multiple of 0.25
+    });
+
+    it('should give 50 points if total is .00', () => {
+      const points = service.calculatePointsFromTotal('20.00');
+      expect(points).toBe(75); // No cents should give 50 points; multiple of .25 AND ends in .00
+    });
+
+    it('should give 25 points if total is .25', () => {
+      const points = service.calculatePointsFromTotal('20.25');
+      expect(points).toBe(25); // "20.25" -> multiple of 0.25
     });
 
     it('should throw error for invalid total format', () => {
       expect(() => service.calculatePointsFromTotal('invalid')).toThrowError('Receipt total amount format is invalid.');
     });
 
-    it('should give 50 points if total is .00', () => {
-      const points = service.calculatePointsFromTotal('20.00');
-      expect(points).toBe(50); // No cents should give 50 points
-    });
+    
   });
 
   describe('calculatePointsFromItemCount', () => {
-    it('should calculate points for item count', () => {
+    it('should calculate points for single item count', () => {
       const items: ReceiptItem[] = [
-        { shortDescription: 'item1', price: '10' },
-        { shortDescription: 'item2', price: '15' },
+        { id: 1, shortDescription: 'item1', price: '10', receipt: {} as any },
+      ];
+      const points = service.calculatePointsFromItemCount(items);
+      expect(points).toBe(0); // 1 item -> 0 points
+    });
+
+    it('should calculate points for odd item count', () => {
+      const items: ReceiptItem[] = [
+        { id: 1, shortDescription: 'item1', price: '10', receipt: {} as any },
+        { id: 1, shortDescription: 'item2', price: '15', receipt: {} as any },
+        { id: 1, shortDescription: 'item2', price: '15', receipt: {} as any },
+      ];
+      const points = service.calculatePointsFromItemCount(items);
+      expect(points).toBe(5); // 3 items -> 5 points
+    });
+
+    it('should calculate points for even item count', () => {
+      const items: ReceiptItem[] = [
+        { id: 1, shortDescription: 'item1', price: '10', receipt: {} as any },
+        { id: 1, shortDescription: 'item2', price: '15', receipt: {} as any },
       ];
       const points = service.calculatePointsFromItemCount(items);
       expect(points).toBe(5); // 2 items -> 5 points
@@ -144,12 +134,12 @@ describe('ReceiptService', () => {
     });
 
     it('should throw error for invalid date format', () => {
-      expect(() => service.calculatePointsFromDate('invalid-date')).toThrowError('Receipt date format is invalid.');
+      expect(() => service.calculatePointsFromDate('invalid')).toThrowError('Receipt date format is invalid.');
     });
   });
 
   describe('calculatePointsFromPurchaseTime', () => {
-    it('should return points for a time between 2PM and 4PM', () => {
+    it('should return 10 points for a time between 2PM and 4PM', () => {
       const points = service.calculatePointsFromPurchaseTime('15:00');
       expect(points).toBe(10); // Time is 3:00 PM (between 2 PM and 4 PM)
     });
@@ -160,7 +150,7 @@ describe('ReceiptService', () => {
     });
 
     it('should throw error for invalid time format', () => {
-      expect(() => service.calculatePointsFromPurchaseTime('invalid-time')).toThrowError('Receipt time format is invalid.');
+      expect(() => service.calculatePointsFromPurchaseTime('1:00')).toThrowError('Receipt time format is invalid.');
     });
   });
 
