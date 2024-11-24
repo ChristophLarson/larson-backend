@@ -8,7 +8,7 @@ services:
     environment:
       - NODE_ENV=production
     volumes:
-      - .:/usr/src/app
+      - .:/usr/src/app/data/
     networks:
       - app-network
 networks:
