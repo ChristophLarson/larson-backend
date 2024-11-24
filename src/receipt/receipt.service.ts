@@ -27,13 +27,13 @@ export class ReceiptService {
   async calculatePoints(id: string): Promise<number> {
     const receipt: Receipt | null = await this.receiptRepository.findOne({
       where:
-      {id: id}
+      {id: id},
+      relations: ['items'],
     });
 
     if(!receipt) {
       throw new Error(`Receipt with id ${id} not found.`);
     }
-
     let points = 0;
 
     points += this.calculatePointsFromRetailer(receipt.retailer);
@@ -56,7 +56,6 @@ export class ReceiptService {
     let points = 0;
 
     const splitTotal = total.split(".");
-
     // If total is well-formed, the split should produce an array of size 2--dolars and cents
     if(splitTotal.length == 2) {
       
@@ -125,9 +124,9 @@ export class ReceiptService {
 
 
   // A helper function to convert a string with two decimal points to type number
-  convertNumStringToNum(dollarString: string, isDollar = true): number {
+  convertNumStringToNum(numString: string, isDollar = true): number {
     // Remove non-numeric characters
-    const cleanedString = dollarString.replace(/[\$,\s:]/g, "");
+    const cleanedString = numString.replace(/[\$,\s:]/g, "");
 
     let number = 0;
     if(isDollar) {
