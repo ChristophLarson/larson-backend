@@ -104,6 +104,11 @@ export class ReceiptService {
 
       let points = 0;
       items.forEach( item => {
+        /*
+        If the trimmed length of the item description is a multiple of 3, 
+        multiply the price by 0.2 and round up to the nearest integer. 
+        The result is the number of points earned.
+        */
         if((item.shortDescription.trim().length % 3) === 0) {
           points += Math.ceil(this.convertNumStringToNum(item.price) * 0.2);
         }
@@ -118,6 +123,9 @@ export class ReceiptService {
     // Check if date is in format YYYY-MM-DD
     if (!isNaN(Date.parse(date))) {
 
+      /*
+        6 points if the day in the purchase date is odd.
+      */
       const purchaseDate: number = this.convertNumStringToNum(date.slice(-2), false);
       if (purchaseDate % 2 !== 0) {
         return 6;
@@ -171,7 +179,6 @@ export class ReceiptService {
     if (isNaN(number)) {
       throw new Error('Invalid dollar amount format.');
     }
-
     return number;
   }
 }
