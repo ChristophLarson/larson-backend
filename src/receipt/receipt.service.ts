@@ -68,15 +68,14 @@ export class ReceiptService {
           Add 25 pts for being multiple of .25. Could have included the .00 check above,
           but separating them may make future changes easier
         */
-        case "0.00":
-        case "0.25":
-        case "0.50":
-        case "0.75":
+        case "00":
+        case "25":
+        case "50":
+        case "75":
           points += 25;
           break;
       }
     }
-
     return points;
   }
 
@@ -85,7 +84,6 @@ export class ReceiptService {
 
     // Add five points for every two items on the receipt
     points += 5 * Math.floor(items.length / 2);
-
     return points;
   }
 
@@ -97,14 +95,13 @@ export class ReceiptService {
         points += Math.ceil(this.convertNumStringToNum(item.price) * 0.2);
       }
     });
-
     return points;
   }
 
   calculatePointsFromDate(date: string): number {
     // Assumes date is in format YYYY-MM-DD
     const purchaseDate: number = this.convertNumStringToNum(date.slice(-2), false);
-    if (purchaseDate % 2 === 0) {
+    if (purchaseDate % 2 !== 0) {
       return 6;
     } else {
       return 0;
@@ -118,6 +115,7 @@ export class ReceiptService {
     if(cleanedTime > 1400 && cleanedTime < 1600) {
       return 10;
     } else {
+
       return 0;
     }
   }
