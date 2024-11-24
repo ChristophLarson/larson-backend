@@ -15,7 +15,7 @@ export class Receipt {
   @Column()
   purchaseTime!: string;
 
-  @Column("decimal", { precision: 10, scale: 2 })
+  @Column()
   total!: string;
 
   @OneToMany(() => ReceiptItem, (item) => item.receipt, { cascade: true })
