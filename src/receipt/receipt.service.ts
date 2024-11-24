@@ -55,68 +55,102 @@ export class ReceiptService {
   calculatePointsFromTotal(total: string): number {
     let points = 0;
 
-    const splitTotal = total.split(".");
-    // If total is well-formed, the split should produce an array of size 2--dolars and cents
-    if(splitTotal.length == 2) {
-      
-      if(splitTotal[1] == "00") {
-        points += 50; // Add fifty pts for having no cents
-      }
-    
-      switch (splitTotal[1]) {
-        /*
+    if(total) {
+
+      const splitTotal = total.split(".");
+      // If total is well-formed, the split should produce an array of size 2--dolars and cents
+      if(splitTotal.length == 2) {
+        
+        if(splitTotal[1] == "00") {
+          points += 50; // Add fifty pts for having no cents
+        }
+        
+        switch (splitTotal[1]) {
+          /*
           Add 25 pts for being multiple of .25. Could have included the .00 check above,
           but separating them may make future changes easier
-        */
-        case "00":
-        case "25":
-        case "50":
-        case "75":
+          */
+          case "00":
+          case "25":
+          case "50":
+          case "75":
           points += 25;
           break;
+        }
+      } else {
+        throw new Error('Receipt total amount format is invalid.');
       }
+        return points;
+    } else {
+      throw new Error('Receipt total must be non-null.');
     }
-    return points;
   }
 
   calculatePointsFromItemCount(items: ReceiptItem[]): number {
-    let points = 0;
+    if(items && items?.length > 0) {
+      let points = 0;
 
-    // Add five points for every two items on the receipt
-    points += 5 * Math.floor(items.length / 2);
-    return points;
+      // Add five points for every two items on the receipt
+      points += 5 * Math.floor(items.length / 2);
+      return points;
+    } else {
+      throw new Error('Receipt items list is null or empty.');
+    }
   }
 
   calculatePointsFromDescriptions(items: ReceiptItem[]): number {
-    let points = 0;
 
-    items.forEach( item => {
-      if((item.shortDescription.trim().length % 3) === 0) {
-        points += Math.ceil(this.convertNumStringToNum(item.price) * 0.2);
-      }
-    });
-    return points;
+    if(items && items?.length > 0) {
+
+      let points = 0;
+      items.forEach( item => {
+        if((item.shortDescription.trim().length % 3) === 0) {
+          points += Math.ceil(this.convertNumStringToNum(item.price) * 0.2);
+        }
+      });
+      return points;
+    } else {
+      throw new Error('Receipt items list is null or empty.');
+    }
   }
 
   calculatePointsFromDate(date: string): number {
-    // Assumes date is in format YYYY-MM-DD
-    const purchaseDate: number = this.convertNumStringToNum(date.slice(-2), false);
-    if (purchaseDate % 2 !== 0) {
-      return 6;
+    // Check if date is in format YYYY-MM-DD
+    if (!isNaN(Date.parse(date))) {
+
+      const purchaseDate: number = this.convertNumStringToNum(date.slice(-2), false);
+      if (purchaseDate % 2 !== 0) {
+        return 6;
+      } else {
+        return 0;
+      }
     } else {
-      return 0;
+      throw new Error('Receipt date format is invalid.');
     }
   }
 
   calculatePointsFromPurchaseTime(time: string): number {
-    const cleanedTime: number = this.convertNumStringToNum(time, false);
+    // A valid time string should have two sets of two chars, separated by a colon
+    if(time) {
+      const timeValidator = time.split(":");
+      if(timeValidator.length === 2
+        && timeValidator[0].length === 2 
+        && timeValidator[1].length === 2) {
 
-    // 10 points if purchase time is after 2PM and before 4PM
-    if(cleanedTime > 1400 && cleanedTime < 1600) {
-      return 10;
+          const cleanedTime: number = this.convertNumStringToNum(time, false);
+      
+          // 10 points if purchase time is after 2PM and before 4PM
+          if(cleanedTime > 1400 && cleanedTime < 1600) {
+            return 10;
+          } else {
+            
+            return 0;
+          }
+        } else {
+          throw new Error('Receipt time format is invalid.')
+        }
     } else {
-
-      return 0;
+      throw new Error('Receipt time format is null or undefined.');
     }
   }
 
@@ -135,7 +169,7 @@ export class ReceiptService {
     
 
     if (isNaN(number)) {
-      throw new Error('Invalid dollar amount format');
+      throw new Error('Invalid dollar amount format.');
     }
 
     return number;
